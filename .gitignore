@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+.env
+venv/
+.venv/
+
+# Data
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+*.csv
+*.xlsx
+
+# ML Models
+*.pkl
+*.joblib
+*.h5
+
+# Node / Frontend
+node_modules/
+dist/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
