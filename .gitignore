@@ -13,6 +13,11 @@ data/processed/*
 *.csv
 *.xlsx
 
+# Models
+backend/models/
+*.pkl
+*.joblib
+
 # ML Models
 *.pkl
 *.joblib
