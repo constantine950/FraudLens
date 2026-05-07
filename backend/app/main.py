@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.utils.data_loader import load_processed_data
 
 app = FastAPI(
     title="FraudLens API",
@@ -7,13 +8,18 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Allow frontend to talk to backend later
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.on_event("startup")
+def startup():
+    X_train, y_train, X_test, y_test = load_processed_data()
+    print(f"✅ Data loaded — Train: {X_train.shape}, Test: {X_test.shape}")
 
 
 @app.get("/")
