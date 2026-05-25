@@ -10,3 +10,8 @@ def load_processed_data():
     y_test = pd.read_csv(os.path.join(PROCESSED_DATA_PATH, "y_test.csv"))
 
     return X_train, y_train, X_test, y_test
+
+
+def get_feature_names():
+    X_test = pd.read_csv(os.path.join(PROCESSED_DATA_PATH, "X_test.csv"))
+    return X_test.columns.tolist()

@@ -3,8 +3,9 @@ import pandas as pd
 
 
 def score_transaction(transaction: dict, model, feature_names: list) -> dict:
-    values = [transaction[f] for f in feature_names]
-    prob = model.predict_proba([values])[0][1]
+    # Build dataframe to preserve feature order
+    df = pd.DataFrame([transaction])[feature_names]
+    prob = model.predict_proba(df)[0][1]
     risk_score = round(prob * 100, 2)
 
     if risk_score >= 70:

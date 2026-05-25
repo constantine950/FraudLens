@@ -20,3 +20,8 @@ export const fetchMetrics = async () => {
   const response = await axios.get(`${BASE_URL}/metrics`);
   return response.data;
 };
+
+export const fetchSample = async (label: "fraud" | "legit") => {
+  const response = await axios.get(`${BASE_URL}/sample/${label}`);
+  return response.data.sample as { [key: string]: number };
+};
