@@ -17,7 +17,7 @@ const emojis = {
   LOW: "🟢",
 };
 
-export default function HistoryTable({ history, onClear }: Props) {
+export default function HistoryTable({ history }: Props) {
   if (history.length === 0) {
     return (
       <div className="bg-white rounded-2xl shadow p-6 text-center text-gray-400 text-sm">
@@ -30,12 +30,7 @@ export default function HistoryTable({ history, onClear }: Props) {
     <div className="bg-white rounded-2xl shadow p-6">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold text-gray-800">Previous Analyses</h2>
-        <button
-          onClick={onClear}
-          className="text-xs text-red-500 hover:underline"
-        >
-          Clear history
-        </button>
+        <span className="text-xs text-gray-400">{history.length} records</span>
       </div>
 
       <div className="overflow-x-auto">

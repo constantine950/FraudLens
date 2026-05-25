@@ -8,11 +8,11 @@ import { useHistory } from "./hooks/useHistory";
 
 export default function App() {
   const { result, loading, error, analyze } = useAnalyze();
-  const { history, addEntry, clearHistory } = useHistory();
+  const { history, refresh } = useHistory();
 
   const handleAnalyze = async (data: { [key: string]: number }) => {
     await analyze(data);
-    if (result) addEntry(result);
+    refresh();
   };
 
   return (
@@ -42,7 +42,7 @@ export default function App() {
           </>
         )}
 
-        <HistoryTable history={history} onClear={clearHistory} />
+        <HistoryTable history={history} onClear={() => {}} />
       </div>
     </div>
   );

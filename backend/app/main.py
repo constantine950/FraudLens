@@ -1,13 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.utils.data_loader import load_processed_data
+from app.utils.data_loader import get_feature_names
 from app.routes import analyze, explain, metrics
+from app.database import init_db
 from contextlib import asynccontextmanager
 import joblib
 import pandas as pd
-
-
-from app.utils.data_loader import get_feature_names
 
 
 @asynccontextmanager
@@ -15,9 +13,9 @@ async def lifespan(app: FastAPI):
     app.state.model = joblib.load("models/random_forest_model.pkl")
     app.state.importance_df = pd.read_csv(
         "../data/processed/feature_importance.csv")
-    app.state.feature_names = get_feature_names()  # correct order from training
-    print("✅ Model and data loaded")
-    print("Features:", app.state.feature_names)
+    app.state.feature_names = get_feature_names()
+    init_db()
+    print("✅ Model, data and database loaded")
     yield
 
 app = FastAPI(

@@ -25,3 +25,8 @@ export const fetchSample = async (label: "fraud" | "legit") => {
   const response = await axios.get(`${BASE_URL}/sample/${label}`);
   return response.data.sample as { [key: string]: number };
 };
+
+export const fetchHistory = async () => {
+  const response = await axios.get(`${BASE_URL}/history`);
+  return response.data;
+};

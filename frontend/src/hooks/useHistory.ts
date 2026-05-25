@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { fetchHistory } from "../utils/api";
 
 export interface HistoryEntry {
   id: string;
@@ -11,22 +12,39 @@ export interface HistoryEntry {
 export function useHistory() {
   const [history, setHistory] = useState<HistoryEntry[]>([]);
 
-  const addEntry = (result: {
-    risk_score: number;
-    fraud_probability: number;
-    risk_level: "HIGH" | "MEDIUM" | "LOW";
-  }) => {
-    const entry: HistoryEntry = {
-      id: crypto.randomUUID(),
-      timestamp: new Date().toLocaleString(),
-      risk_score: result.risk_score,
-      fraud_probability: result.fraud_probability,
-      risk_level: result.risk_level,
+  const loadHistory = useCallback(async () => {
+    try {
+      const data = await fetchHistory();
+      setHistory(data);
+    } catch (error) {
+      console.error("Failed to load history", error);
+    }
+  }, []);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const getHistory = async () => {
+      try {
+        const data = await fetchHistory();
+
+        if (mounted) {
+          setHistory(data);
+        }
+      } catch (error) {
+        console.error("Failed to load history", error);
+      }
     };
-    setHistory((prev) => [entry, ...prev]);
+
+    getHistory();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  return {
+    history,
+    refresh: loadHistory,
   };
-
-  const clearHistory = () => setHistory([]);
-
-  return { history, addEntry, clearHistory };
 }

@@ -1,7 +1,9 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, Depends
+from sqlalchemy.orm import Session
 from app.ml.scorer import score_transaction
 from app.ml.explainer import explain_transaction
 from app.utils.data_loader import load_processed_data
+from app.database import get_db, Transaction
 import numpy as np
 
 router = APIRouter()
@@ -18,13 +20,22 @@ def get_test_data():
 
 
 @router.post("/analyze")
-def analyze(request: Request, transaction: dict):
+def analyze(request: Request, transaction: dict, db: Session = Depends(get_db)):
     model = request.app.state.model
     importance_df = request.app.state.importance_df
     feature_names = request.app.state.feature_names
 
     score = score_transaction(transaction, model, feature_names)
     explanation = explain_transaction(transaction, model, importance_df)
+
+    # Save to database
+    entry = Transaction(
+        risk_score=score['risk_score'],
+        fraud_probability=score['fraud_probability'],
+        risk_level=score['risk_level'],
+    )
+    db.add(entry)
+    db.commit()
 
     return {
         "risk_score": score['risk_score'],
@@ -48,3 +59,19 @@ def get_sample(label: str):
     transaction = X_test.iloc[idx].to_dict()
 
     return {"sample": transaction}
+
+
+@router.get("/history")
+def get_history(db: Session = Depends(get_db)):
+    entries = db.query(Transaction).order_by(
+        Transaction.timestamp.desc()).limit(50).all()
+    return [
+        {
+            "id": e.id,
+            "timestamp": e.timestamp.strftime("%m/%d/%Y, %I:%M:%S %p"),
+            "risk_score": e.risk_score,
+            "fraud_probability": e.fraud_probability,
+            "risk_level": e.risk_level,
+        }
+        for e in entries
+    ]
