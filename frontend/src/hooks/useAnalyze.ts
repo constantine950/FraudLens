@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { analyzeTransaction } from "../utils/api";
+import axios from "axios";
 
 interface Result {
   risk_score: number;
@@ -20,10 +21,17 @@ export function useAnalyze() {
       const data = await analyzeTransaction(transaction);
       setResult(data);
     } catch (err) {
-      setError(
-        "Failed to connect to backend. Is the server running?" +
-          (err instanceof Error ? err.message : "Unknown error"),
-      );
+      if (axios.isAxiosError(err)) {
+        if (err.response?.status === 422) {
+          setError(`Validation error: ${err.response.data.detail}`);
+        } else if (err.response?.status === 500) {
+          setError("Server error. Please try again.");
+        } else if (!err.response) {
+          setError("Cannot connect to backend. Is the server running?");
+        } else {
+          setError("Something went wrong. Please try again.");
+        }
+      }
     } finally {
       setLoading(false);
     }

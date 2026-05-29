@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from app.ml.scorer import score_transaction
 from app.ml.explainer import explain_transaction
 from app.utils.data_loader import load_processed_data
+from app.utils.validators import validate_transaction
 from app.database import get_db, Transaction
 import numpy as np
 
@@ -24,6 +25,9 @@ def analyze(request: Request, transaction: dict, db: Session = Depends(get_db)):
     model = request.app.state.model
     importance_df = request.app.state.importance_df
     feature_names = request.app.state.feature_names
+
+    # Validate input
+    validate_transaction(transaction)
 
     score = score_transaction(transaction, model, feature_names)
     explanation = explain_transaction(transaction, model, importance_df)
@@ -49,6 +53,11 @@ def analyze(request: Request, transaction: dict, db: Session = Depends(get_db)):
 def get_sample(label: str):
     X_test, y_test = get_test_data()
     y = y_test.values.ravel()
+
+    if label not in ["fraud", "legit"]:
+        from fastapi import HTTPException
+        raise HTTPException(
+            status_code=400, detail="label must be 'fraud' or 'legit'")
 
     if label == "fraud":
         indices = np.where(y == 1)[0]
