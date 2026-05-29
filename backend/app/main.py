@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from app.utils.data_loader import get_feature_names
 from app.routes import analyze, explain, metrics
@@ -6,6 +6,7 @@ from app.database import init_db
 from contextlib import asynccontextmanager
 import joblib
 import pandas as pd
+import time
 
 
 @asynccontextmanager
@@ -31,6 +32,15 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.middleware("http")
+async def log_response_time(request: Request, call_next):
+    start = time.time()
+    response = await call_next(request)
+    duration = round((time.time() - start) * 1000, 2)
+    print(f"⏱ {request.method} {request.url.path} — {duration}ms")
+    return response
 
 app.include_router(analyze.router)
 app.include_router(explain.router)
