@@ -1,7 +1,6 @@
 from sqlalchemy import create_engine, Column, Integer, Float, String, DateTime
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
-from datetime import datetime
+from sqlalchemy.orm import sessionmaker, declarative_base
+from datetime import datetime, timezone
 import os
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -17,7 +16,7 @@ class Transaction(Base):
     __tablename__ = "transactions"
 
     id = Column(Integer, primary_key=True, index=True)
-    timestamp = Column(DateTime, default=datetime.utcnow)
+    timestamp = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     risk_score = Column(Float)
     fraud_probability = Column(Float)
     risk_level = Column(String)
